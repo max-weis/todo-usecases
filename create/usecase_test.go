@@ -1,4 +1,4 @@
-package todo_test
+package create_test
 
 import (
 	"context"
@@ -15,14 +15,14 @@ var now = time.Now()
 func TestTodo_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		todo    todo.Todo
+		todo    create.Todo
 		wantErr error
 	}{
-		{"Empty Title", todo.Todo{Title: "", DueDate: now.Add(24 * time.Hour)}, todo.ErrEmptyTitle},
-		{"Valid Todo", todo.Todo{Title: "Buy Milk", DueDate: now.Add(24 * time.Hour)}, nil},
-		{"Past Due Date", todo.Todo{Title: "Expired Task", DueDate: now.Add(-24 * time.Hour)}, todo.ErrInvalidDueDate},
-		{"Whitespace Title", todo.Todo{Title: "   ", DueDate: now.Add(24 * time.Hour)}, todo.ErrEmptyTitle},
-		{"No Due Date", todo.Todo{Title: "No Due Date"}, todo.ErrInvalidDueDate},
+		{"Empty Title", create.Todo{Title: "", DueDate: now.Add(24 * time.Hour)}, create.ErrEmptyTitle},
+		{"Valid Todo", create.Todo{Title: "Buy Milk", DueDate: now.Add(24 * time.Hour)}, nil},
+		{"Past Due Date", create.Todo{Title: "Expired Task", DueDate: now.Add(-24 * time.Hour)}, create.ErrInvalidDueDate},
+		{"Whitespace Title", create.Todo{Title: "   ", DueDate: now.Add(24 * time.Hour)}, create.ErrEmptyTitle},
+		{"No Due Date", create.Todo{Title: "No Due Date"}, create.ErrInvalidDueDate},
 	}
 
 	for _, tt := range tests {
@@ -46,17 +46,17 @@ func TestCreateTodoUseCase(t *testing.T) {
 		expectedTitle string
 	}{
 		{"Valid Creation", "Do Homework", now.Add(24 * time.Hour), nil, nil, "Do Homework"},
-		{"Empty Title", "", now.Add(24 * time.Hour), nil, todo.ErrEmptyTitle, ""},
-		{"Past Due Date", "Late Task", now.Add(-24 * time.Hour), nil, todo.ErrInvalidDueDate, ""},
+		{"Empty Title", "", now.Add(24 * time.Hour), nil, create.ErrEmptyTitle, ""},
+		{"Past Due Date", "Late Task", now.Add(-24 * time.Hour), nil, create.ErrInvalidDueDate, ""},
 		{"Save Error", "Save Error", now.Add(24 * time.Hour), dbError, dbError, ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			saveTodo := func(ctx context.Context, todo todo.Todo) error {
+			saveTodo := func(ctx context.Context, todo create.Todo) error {
 				return tt.saveTodoErr
 			}
-			useCase := todo.NewCreateTodoUseCase(saveTodo)
+			useCase := create.NewCreateTodoUseCase(saveTodo)
 			_, err := useCase(context.Background(), tt.title, tt.dueDate)
 
 			if tt.expectedErr != nil {
